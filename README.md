@@ -1,22 +1,45 @@
 # README
 
-Minimal code for running numerical examples in the paper
+This repository contains minimal code for running the numerical examples in the paper:
 
 D. Pradovera, M. Nonino, and I. Perugia, _Geometry-based approximation of waves propagating through complex domains_ (2023)
 
-# Prerequisites
+Preprint available soon!
+
+## Prerequisites
 * **numpy** and **scipy**
 * **matplotlib**
 * **fenics** and **mshr** for 2D FEM tests
 
-# Running
-The ROM-based simulations can be run via !!run_rom.py!!.
+## Fenics
+The 2D FEM engine relies on [FEniCS](http://fenicsproject.org/). If you do not have FEniCS installed, you may want to create an [Anaconda3/Miniconda3](http://anaconda.org/) environment using the command
+```
+conda create -n fenicsenv -c conda-forge numpy scipy matplotlib fenics=2019.1.0=py38_9 mshr=2019.1.0=py38hf9f41d3_3
+```
+This will create an environment where FEniCS (and all other required modules) can be used. In order to use FEniCS, the environment must be activated through
+```
+conda activate fenicsenv
+```
+See the [Anaconda documentation](http://docs.conda.io/) for more information.
+
+### Fenics and mshr versions
+More recent versions of FEniCS and mshr may be preferred, but one should be careful of [inconsistent dependencies](http://fenicsproject.discourse.group/t/anaconda-installation-of-fenics-and-mshr/2062/5). If the following code snippet runs successfully, then your environment *should* have been created correctly:
+```
+from mshr import *
+```
+
+## Execution
+The ROM-based simulations can be run via `run_rom.py`. The FEM-based simulations can be run via `run_fem.py`.
 
 Code can be run as
 ```
-python3 run_rom $example_tag
+python3 run_rom.py $example_tag
 ```
-where `$example_tag` can take the values
+or
+```
+python3 run_fem.py $example_tag
+```
+The placeholder `$example_tag` can take the values
 * `wedge_1`
 * `wedge_2`
 * `wedge_3`
@@ -27,5 +50,16 @@ where `$example_tag` can take the values
 * `room_harmonic_1`
 * `room_harmonic_5`
 
+Otherwise, one can simply run
+```
+python3 run_rom.py
+```
+or
+```
+python3 run_fem.py
+```
+and then input `$example_tag` later.
+
 ## Acknowledgments
 Part of the funding that made this code possible has been provided by the Austrian Science Fund (FWF) through projects F 65 and P 33477.
+

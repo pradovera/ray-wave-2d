@@ -22,7 +22,7 @@ if example_tag not in allowed_tags:
 
 #%% load example
 (t_max, R, u0, u1, outer, inner, bcs, x, y,
- r_V, t_V, cutoff, add_forcing) = load_example_rom(example_tag)
+ mesh, ts, cutoff, add_forcing) = load_example_rom(example_tag)
 
 D = domain()
 D.points = outer
@@ -32,15 +32,14 @@ for pt in inner:
                                                    for i in range(len(pt) - 1)]
     D.edges += [[len(D.points) + len(pt) - 1, len(D.points)]]
     D.points += pt
-D.plot()
 D.bcs = bcs
 
 #%% perform 1D FEM simulation
-V = generate_snapshots_polar(r_V, t_V, u0(r_V), u1(r_V), add_forcing)
+V = generate_snapshots_polar(mesh, ts, u0(mesh), u1(mesh), add_forcing)
 V_amplitude = np.maximum.accumulate(np.max(np.abs(V), axis = 0)[::-1])[::-1]
 
 def weights_cutoff(t):
-    i_t_supp = np.where(t_V <= t)[0]
+    i_t_supp = np.where(ts <= t)[0]
     if len(i_t_supp) == 0: i_t_supp = [0]
     return cutoff / V_amplitude[i_t_supp[-1]]
 def predict_2d(x_1, x_2, X_1, X_2, transpose = False):
@@ -65,9 +64,9 @@ def predict_2d(x_1, x_2, X_1, X_2, transpose = False):
     v[np.logical_or(np.isinf(v), np.isnan(v))] = 0.
     return v
 # spline over r, hat-function over t
-predict_V = lambda r_, t_: predict_2d(r_, t_, r_V, t_V, False)
+predict_V = lambda r_, t_: predict_2d(r_, t_, mesh, ts, False)
 # hat-function over r, spline over t
-predict_VT = lambda r_, t_: predict_2d(r_, t_, r_V, t_V, True)
+predict_VT = lambda r_, t_: predict_2d(r_, t_, mesh, ts, True)
 
 #%% build ray
 rays, angle_weights = build_ray_sequence(D, (0.,) * 2, R, t_max,
