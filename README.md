@@ -4,7 +4,7 @@ This repository contains minimal code for running the numerical examples in the 
 
 D. Pradovera, M. Nonino, and I. Perugia, _Geometry-based approximation of waves propagating through complex domains_ (2023)
 
-Preprint available soon!
+Preprint publicly available [here](https://arxiv.org/abs/2301.13613)!
 
 ## Prerequisites
 * **numpy** and **scipy**
@@ -62,4 +62,3 @@ and then input `$example_tag` later.
 
 ## Acknowledgments
 Part of the funding that made this code possible has been provided by the Austrian Science Fund (FWF) through projects F 65 and P 33477.
-
