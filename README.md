@@ -2,7 +2,7 @@
 
 This repository contains minimal code for running the numerical examples in the paper:
 
-D. Pradovera, M. Nonino, and I. Perugia, _Geometry-based approximation of waves propagating through complex domains_ (2023)
+D. Pradovera, M. Nonino, and I. Perugia, _Geometry-based approximation of waves in complex domains_ (2023)
 
 Preprint publicly available [here](https://arxiv.org/abs/2301.13613)!
 
@@ -45,8 +45,8 @@ The placeholder `$example_tag` can take the values
 * `wedge_3`
 * `wedge_4`
 * `cavity`
-* `room_1e-2`
-* `room_1e-3`
+* `room_tol2.5e-2`
+* `room_tol1e-3`
 * `room_harmonic_1`
 * `room_harmonic_5`
 

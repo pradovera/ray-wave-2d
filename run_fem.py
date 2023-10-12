@@ -18,7 +18,8 @@ else:
 example_tag = example_tag.lower().replace(" ","").strip()
 
 allowed_tags = ["wedge_1", "wedge_2", "wedge_3", "wedge_4", "cavity",
-                "room_1e-2", "room_1e-3", "room_harmonic_1", "room_harmonic_5"]
+                "room_tol2.5e-2", "room_tol1e-3",
+                "room_harmonic_1", "room_harmonic_5"]
 if example_tag not in allowed_tags:
     raise Exception(("Value of example_tag not recognized. Allowed values:\n"
                      "{}").format(allowed_tags))

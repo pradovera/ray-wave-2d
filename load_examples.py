@@ -2,15 +2,17 @@ import numpy as np
 
 def load_example_rom(tag):
     # t_max - time horizon
-    if tag[: 5] == "wedge" or tag == "cavity":
+    if tag[: 5] == "wedge":
         t_max = 5.
+    elif tag == "cavity":
+        t_max = 9.
     else:#if tag[: 4] == "room":
         t_max = 20.
 
     # R - radius of data support
     if tag[: 5] == "wedge" or tag == "cavity":
         width_front = .2
-    elif tag[: 6] == "room_1":
+    elif tag[: 8] =="room_tol":
         width_front = .25
     else:#if tag[: 13] == "room_harmonic":
         width_front = 0.
@@ -19,7 +21,7 @@ def load_example_rom(tag):
     # ts - t-grid for timestepping
     if tag[: 5] == "wedge" or tag == "cavity":
         n_mesh = 1000
-    elif tag[: 6] == "room_1":
+    elif tag[: 8] =="room_tol":
         n_mesh = 840
     elif tag == "room_harmonic_1":
         n_mesh = 400
@@ -34,7 +36,7 @@ def load_example_rom(tag):
     # u0 - initial condition
     if tag[: 5] == "wedge" or tag == "cavity":
         u0 = lambda x: np.exp(-.5 * (x / width_front) ** 2.)
-    elif tag[: 6] == "room_1":
+    elif tag[: 8] =="room_tol":
         u0 = lambda x: (np.exp(-.5 * (x / width_front) ** 2.)
                       * (1 - (x / width_front) ** 2.))
     else:#if tag[: 13] == "room_harmonic":
@@ -101,13 +103,13 @@ def load_example_rom(tag):
     # cutoff - tolerance for cutoff
     if tag[: 5] == "wedge" or tag == "cavity":
         cutoff = -1
-    elif tag == "room_1e-3":
+    elif tag == "room_tol1e-3":
         cutoff = 1e-3
     else:
-        cutoff = 1e-2
+        cutoff = 2.5e-2
 
     # add_forcing - function to enforce forcing term
-    if tag[: 5] == "wedge" or tag == "cavity" or tag[: 6] == "room_1":
+    if tag[: 5] == "wedge" or tag == "cavity" or tag[: 8] =="room_tol":
         add_forcing = None
     else:# if tag[: 13] == "room_harmonic":
         from fem import generate_snapshots_polar
@@ -127,17 +129,18 @@ def load_example_rom(tag):
                                  - 2 * np.sin(omega_f * (t_ - dt))
                                  + np.sin(omega_f * (t_))) / dt ** 2
             return u_
-    return (t_max, R, u0, u1, outer, inner, bcs,
-            x, y, mesh, ts, cutoff, add_forcing)
+    ks_diffraction = 10
+    return (t_max, R, u0, u1, outer, inner, bcs, x, y,
+            mesh, ts, cutoff, add_forcing, ks_diffraction)
 
 def load_example_fem(tag):
     (t_max, R, _, _, outer, inner,
-     bcs, x, y, _, _, cutoff, _) = load_example_rom(tag)
+     bcs, x, y, _, _, cutoff, _, _) = load_example_rom(tag)
 
     # Vspace - FEniCS FEM function space
     if tag[: 5] == "wedge" or tag == "cavity":
         n_mesh = 1000
-    elif tag[: 6] == "room_1":
+    elif tag[: 8] =="room_tol":
         n_mesh = 960
     elif tag == "room_harmonic_1":
         n_mesh = 400
@@ -159,7 +162,7 @@ def load_example_fem(tag):
     if tag[: 5] == "wedge" or tag == "cavity":
         u0 = lambda x: np.exp(-.5 * ((x[:, 0] / .2) ** 2.
                                    + (x[:, 1] / .2) ** 2.))
-    elif tag[: 6] == "room_1":
+    elif tag[: 8] =="room_tol":
         u0 = lambda x: np.exp(-.5 * ((x[:, 0] / .25) ** 2.
                                    + (x[:, 1] / .25) ** 2.)
                               ) * (1 - (x[:, 0] / .25) ** 2.
@@ -180,7 +183,7 @@ def load_example_fem(tag):
                                                 and x[1] > -9. and x[1] < 0.)
 
     # add_forcing - function to enforce forcing term
-    if tag[: 5] == "wedge" or tag == "cavity" or tag[: 6] == "room_1":
+    if tag[: 5] == "wedge" or tag == "cavity" or tag[: 8] =="room_tol":
         add_forcing = None
     else:# if tag[: 13] == "room_harmonic":
         from fem import generate_snapshots_mesh
