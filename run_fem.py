@@ -31,13 +31,13 @@ if example_tag not in allowed_tags:
 #%% perform 2D FEM simulation
 xy = Vspace.tabulate_dof_coordinates()
 V = generate_snapshots_mesh(Vspace, ts, u0(xy), u1(xy), where_dirichlet,
-                            add_forcing)
+                            add_forcing, only_final = True)
 
 #%% predict at t_max
 Y, X = np.meshgrid(y, x)
 XY = np.c_[X.flatten(), Y.flatten()]
 V_f = fen.Function(Vspace)
-V_f.vector().set_local(V[:, -1])
+V_f.vector().set_local(V)
 U = np.zeros(len(XY))
 for j, xy in enumerate(XY):
     try:

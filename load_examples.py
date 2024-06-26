@@ -15,20 +15,19 @@ def load_example_rom(tag):
     elif tag[: 8] =="room_tol":
         width_front = .25
     else:#if tag[: 13] == "room_harmonic":
-        width_front = 0.
+        width_front = .05
     R = 5 * width_front
 
     # ts - t-grid for timestepping
     if tag[: 5] == "wedge" or tag == "cavity":
         n_mesh = 1000
     elif tag[: 8] =="room_tol":
-        n_mesh = 840
+        n_mesh = 1500
     elif tag == "room_harmonic_1":
-        n_mesh = 400
-    else:#if tag == "room_harmonic_5":
         n_mesh = 2000
+    else:#if tag == "room_harmonic_5":
+        n_mesh = 4000
     ts = np.linspace(0., (1 + 1. / (2 * n_mesh)) * t_max, 2 * (n_mesh + 1))
-    dt = ts[1]
 
     # mesh - r-grid for FEM
     mesh = np.linspace(0., t_max + R, n_mesh + 1)
@@ -54,7 +53,7 @@ def load_example_rom(tag):
         if tag == "wedge_3":
             outer = [(-1.5, 1.), (-1.5, 4.), (4., 4.), (4., -4.), (-3.5, -4.)]
         if tag == "wedge_4":
-            outer = [(-1., -4.), (-1., 6.), (6., 6.), (6., -9.), (-3., -9.)]
+            outer = [(-1., -4.), (-1., 6.25), (6.25, 6.25), (6.25, -9.), (-3., -9.)]
         mult = (t_max - 1) / np.linalg.norm(outer[0])
         outer = [(x[0] * mult, x[1] * mult) for x in outer]
     elif tag == "cavity":
@@ -112,23 +111,15 @@ def load_example_rom(tag):
     if tag[: 5] == "wedge" or tag == "cavity" or tag[: 8] =="room_tol":
         add_forcing = None
     else:# if tag[: 13] == "room_harmonic":
-        from fem import generate_snapshots_polar
-        mass = generate_snapshots_polar(mesh, ts[: 2], 0., 0.,
-                                        return_matrices = 1)[2]
+        forcing_call = lambda x: np.exp(-.5 * (x / width_front) ** 2.)
+        from fem import assemble_forcing_polar
+        rhs_base = assemble_forcing_polar(len(mesh), mesh[1], forcing_call)
         if tag == "room_harmonic_1":
             omega_f = 2 * np.pi
         if tag == "room_harmonic_5":
             omega_f = 10 * np.pi
         def add_forcing(u_, t_):
-            if np.abs(t_ - dt) < 1e-10:
-                u_[0] = 2 * mass[0] * (np.sin(omega_f * (t_))
-                                     - np.sin(omega_f * (t_ - dt))
-                                       ) / dt ** 2
-            else:
-                u_[0] = mass[0] * (np.sin(omega_f * (t_ - 2 * dt))
-                                 - 2 * np.sin(omega_f * (t_ - dt))
-                                 + np.sin(omega_f * (t_))) / dt ** 2
-            return u_
+            return u_ - omega_f ** 2 * np.sin(omega_f * t_) * rhs_base
     ks_diffraction = 10
     return (t_max, R, u0, u1, outer, inner, bcs, x, y,
             mesh, ts, cutoff, add_forcing, ks_diffraction)
@@ -141,11 +132,9 @@ def load_example_fem(tag):
     if tag[: 5] == "wedge" or tag == "cavity":
         n_mesh = 1000
     elif tag[: 8] =="room_tol":
-        n_mesh = 960
-    elif tag == "room_harmonic_1":
-        n_mesh = 400
-    else:#if tag == "room_harmonic_5":
         n_mesh = 2000
+    else:#if tag[: 13] == "room_harmonic":
+        n_mesh = 3000
     import mshr, fenics as fen
     domain = mshr.Polygon([fen.Point(*x) for x in outer[::-1]])
     for inn in inner:
@@ -156,7 +145,6 @@ def load_example_fem(tag):
     # ts - t-grid for timestepping
     n_mesh_t = int(np.round(2 * t_max / mesh.hmin()))
     ts = np.linspace(0., t_max, n_mesh_t + 1)
-    dt = ts[1]
 
     # u0 - initial condition
     if tag[: 5] == "wedge" or tag == "cavity":
@@ -186,25 +174,15 @@ def load_example_fem(tag):
     if tag[: 5] == "wedge" or tag == "cavity" or tag[: 8] =="room_tol":
         add_forcing = None
     else:# if tag[: 13] == "room_harmonic":
-        from fem import generate_snapshots_mesh
-        mass = generate_snapshots_mesh(Vspace, ts[: 2], 0., 0.,
-                                       where_dirichlet, return_matrices = 1)[2]
+        forcing_string = "exp(-.5 * (x[0]*x[0]+x[1]*x[1]) / .0025)"
+        from fem import assemble_forcing_mesh
+        rhs_base = assemble_forcing_mesh(Vspace, forcing_string, where_dirichlet)
         if tag == "room_harmonic_1":
             omega_f = 2 * np.pi
         if tag == "room_harmonic_5":
             omega_f = 10 * np.pi
-        xy = Vspace.tabulate_dof_coordinates()
-        idx_f = np.argmin(np.linalg.norm(xy, axis = 1))
         def add_forcing(u_, t_):
-            if np.abs(t_ - dt) < 1e-10:
-                u_[idx_f] = 2 * mass[idx_f] * (np.sin(omega_f * (t_))
-                                             - np.sin(omega_f * (t_ - dt))
-                                               ) / dt ** 2
-            else:
-                u_[idx_f] = mass[idx_f] * (np.sin(omega_f * (t_ - 2 * dt))
-                                         - 2 * np.sin(omega_f * (t_ - dt))
-                                         + np.sin(omega_f * (t_))) / dt ** 2
-            return u_
+            return u_ - omega_f ** 2 * np.sin(omega_f * t_) * rhs_base
     
     return (t_max, R, u0, u1, Vspace, where_dirichlet,
             x, y, ts, cutoff, add_forcing)

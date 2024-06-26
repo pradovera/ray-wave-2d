@@ -14,7 +14,7 @@ Preprint publicly available [here](https://arxiv.org/abs/2301.13613)!
 ## Fenics
 The 2D FEM engine relies on [FEniCS](http://fenicsproject.org/). If you do not have FEniCS installed, you may want to create an [Anaconda3/Miniconda3](http://anaconda.org/) environment using the command
 ```
-conda create -n fenicsenv -c conda-forge numpy scipy matplotlib fenics=2019.1.0=py38_9 mshr=2019.1.0=py38hf9f41d3_3
+conda create -n fenicsenv -c conda-forge numpy=1.21.4=py38he2449b9_0 scipy=1.5.3=py38h828c644_0 matplotlib=3.4.3=py38h578d9bd_1 fenics=2019.1.0=py38_9 mshr=2019.1.0=py38hf9f41d3_3 boost-cpp=1.72.0=h312852a_5
 ```
 This will create an environment where FEniCS (and all other required modules) can be used. In order to use FEniCS, the environment must be activated through
 ```
